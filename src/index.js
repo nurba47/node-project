@@ -36,7 +36,7 @@ if (!isProduction) {
 
 //Configure Mongoose
 mongoose.connect(
-  "mongodb://localhost/nodejs-project",
+  process.env.MONGODB_URI,
   { useNewUrlParser: true }
 );
 mongoose.set("debug", true);

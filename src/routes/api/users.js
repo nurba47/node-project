@@ -1,8 +1,7 @@
-import mongoose from "mongoose";
-import { authenticate } from "passport";
-import { Router } from "express";
-const router = Router();
-import auth from "../auth";
+const mongoose = require("mongoose");
+const passport = require("passport");
+const router = require("express").Router();
+const auth = require("../auth");
 const Users = mongoose.model("Users");
 
 //POST new user route (optional, everyone has access)
@@ -56,7 +55,7 @@ router.post("/login", auth.optional, (req, res, next) => {
     });
   }
 
-  return authenticate("local", { session: false }, (err, passportUser, info) => {
+  return passport.authenticate("local", { session: false }, (err, passportUser, info) => {
     if (err) {
       return next(err);
     }
@@ -87,4 +86,4 @@ router.get("/current", auth.required, (req, res, next) => {
   });
 });
 
-export default router;
+module.exports = router;

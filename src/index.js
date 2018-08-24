@@ -5,6 +5,9 @@ import session from "express-session";
 import cors from "cors";
 import mongoose from "mongoose";
 import errorHandler from "errorhandler";
+import dotenv from "dotenv";
+
+dotenv.load();
 
 //Configure mongoose's promise to global promise
 mongoose.promise = global.Promise;
@@ -70,4 +73,6 @@ app.use((err, req, res) => {
   });
 });
 
-app.listen(process.env.PORT, () => console.log("Server running on http://localhost:8000/"));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}/`));

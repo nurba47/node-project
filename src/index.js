@@ -1,10 +1,10 @@
-const express = require("express");
-const path = require("path");
-const bodyParser = require("body-parser");
-const session = require("express-session");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const errorHandler = require("errorhandler");
+import express from "express";
+import { join } from "path";
+import { urlencoded, json } from "body-parser";
+import session from "express-session";
+import cors from "cors";
+import mongoose from "mongoose";
+import errorHandler from "errorhandler";
 
 //Configure mongoose's promise to global promise
 mongoose.promise = global.Promise;
@@ -18,9 +18,9 @@ const app = express();
 //Configure our app
 app.use(cors());
 app.use(require("morgan")("dev"));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(urlencoded({ extended: false }));
+app.use(json());
+app.use(express.static(join(__dirname, "public")));
 app.use(
   session({
     secret: "passport-tutorial",
@@ -35,12 +35,15 @@ if (!isProduction) {
 }
 
 //Configure Mongoose
-mongoose.connect("mongodb://localhost/nodejs-project");
+mongoose.connect(
+  "mongodb://localhost/nodejs-project",
+  { useNewUrlParser: true }
+);
 mongoose.set("debug", true);
 
-require("./models/Users");
-require("./config/passport");
-app.use(require("./routes"));
+import "./models/Users";
+import "./config/passport";
+app.use(require("./routes").default);
 
 //Error handlers & middlewares
 if (!isProduction) {
@@ -67,4 +70,4 @@ app.use((err, req, res) => {
   });
 });
 
-app.listen(8000, () => console.log("Server running on http://localhost:8000/"));
+app.listen(process.env.PORT, () => console.log("Server running on http://localhost:8000/"));

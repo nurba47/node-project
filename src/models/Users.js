@@ -5,9 +5,10 @@ const jwt = require("jsonwebtoken");
 const { Schema } = mongoose;
 
 const UsersSchema = new Schema({
-  email: String,
-  hash: String,
-  salt: String
+  email: { type: String, required: true, lowercase: true, trim: true },
+  hash: { type: String, required: true },
+  salt: { type: String, required: true },
+  referralCode: { type: String, required: true }
 });
 
 UsersSchema.methods.setPassword = function(password) {

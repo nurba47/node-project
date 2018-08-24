@@ -26,11 +26,36 @@ router.post("/", auth.optional, (req, res, next) => {
     });
   }
 
-  const finalUser = new Users(user);
+  if (!user.referralCode) {
+    return res.status(422).json({
+      errors: {
+        referralCode: "is required"
+      }
+    });
+  } else {
+    Users.findOne({ referralCode: user.referralCode }).then((err, found) => {
+      if (err)
+        return res.status(500).json({
+          errors: {
+            message: err.message
+          }
+        });
 
-  finalUser.setPassword(user.password);
+      if (!found)
+        return res.status(422).json({
+          errors: {
+            referralCode: `User with referralCode ${user.referralCode} does not exist`
+          }
+        });
 
-  return finalUser.save().then(() => res.json({ user: finalUser.toAuthJSON() }));
+      const finalUser = new Users(user);
+
+      finalUser.setPassword(user.password);
+
+      return finalUser.save().then(() => res.json({ user: finalUser.toAuthJSON() }));
+    });
+    return;
+  }
 });
 
 //POST login route (optional, everyone has access)

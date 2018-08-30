@@ -49,7 +49,7 @@ async function remove(model, condition) {
   }
 }
 
-find(Users, {}, { email: 1 });
+// find(Users, {}, { email: 1 });
 // find(Drugs, {});
 
 // remove(Users);

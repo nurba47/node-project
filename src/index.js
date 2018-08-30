@@ -6,6 +6,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const errorHandler = require("errorhandler");
 const dotenv = require("dotenv");
+require("./utils/helpers");
 dotenv.load();
 
 //Configure mongoose's promise to global promise
@@ -43,7 +44,7 @@ mongoose.connect(
 );
 mongoose.set("debug", true);
 
-require("./models/Users");
+require("./models");
 require("./config/passport");
 app.use(require("./routes"));
 

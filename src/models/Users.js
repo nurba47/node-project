@@ -16,18 +16,29 @@ const UsersSchema = new Schema({
     lowercase: true,
     trim: true,
     dropDups: true,
-    unique: true,
-    index: true
+    unique: true
   },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
-  parentCode: { type: String, required: true },
-  referralCode: {
+  parentCode: {
     type: String,
     required: true,
+    validate: {
+      validator: function(parentCode) {
+        let UserModel = this.model("Users");
+        return new Promise(resolve => {
+          UserModel.findOne({ referralCode: parentCode }).then(user => {
+            return resolve(user !== null);
+          });
+        });
+      },
+      msg: props => `${props.value} is not a valid!`
+    }
+  },
+  referralCode: {
+    type: String,
     dropDups: true,
-    unique: true,
-    index: true
+    unique: true
   }
 });
 
@@ -63,7 +74,7 @@ UsersSchema.methods.toAuthJSON = function() {
 };
 
 UsersSchema.pre("save", function(next) {
-  this.referralCode = codeGenerator(7);
+  this.referralCode = codeGenerator(10);
   next();
 });
 

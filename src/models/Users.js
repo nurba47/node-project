@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const { generatePrefix, generateCode } = require("../utils/helpers");
+
 const dotenv = require("dotenv");
-const { codeGenerator } = require("../utils/helpers");
 dotenv.load();
 
 const SECRET = process.env.SECRET || "secret";
@@ -73,9 +74,22 @@ UsersSchema.methods.toAuthJSON = function() {
   };
 };
 
-UsersSchema.pre("save", function(next) {
-  this.referralCode = codeGenerator(10);
-  next();
+UsersSchema.pre("save", async function(next) {
+  const prefix = generatePrefix();
+  const Codes = mongoose.model("Codes");
+
+  let found = await Codes.findOne({ code: prefix });
+  let number = found ? found.lastValue + 1 : 1;
+  let code = generateCode(prefix, number);
+  this.referralCode = code;
+  try {
+    if (found) {
+      await Codes.findByIdAndUpdate(found._id, { $set: { lastValue: number } });
+    } else await new Codes({ code: prefix, lastValue: number }).save();
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 mongoose.model("Users", UsersSchema);

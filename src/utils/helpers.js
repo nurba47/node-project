@@ -4,11 +4,7 @@ String.prototype.pad = function(size) {
   return s;
 };
 
-// s = "10";
-// s = s.pad(2);
-// console.log(s);
-
-exports.codeGenerator = function codeGenerator(suffix = "") {
+exports.generatePrefix = function() {
   let date = new Date();
   let year = date
     .getFullYear()
@@ -18,6 +14,10 @@ exports.codeGenerator = function codeGenerator(suffix = "") {
     .getMonth()
     .toString()
     .pad(2);
-  suffix = suffix.toString().pad(6);
-  return year + month + suffix;
+  return year + month;
+};
+
+exports.generateCode = function(prefix, number) {
+  suffix = number.toString().pad(6);
+  return prefix + suffix;
 };

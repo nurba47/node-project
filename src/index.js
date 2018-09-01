@@ -5,9 +5,11 @@ const session = require("express-session");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const errorHandler = require("errorhandler");
+
 const dotenv = require("dotenv");
-require("./utils/helpers");
 dotenv.load();
+
+require("./utils/helpers");
 
 //Configure mongoose's promise to global promise
 mongoose.promise = global.Promise;

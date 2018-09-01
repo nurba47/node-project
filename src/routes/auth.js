@@ -1,5 +1,8 @@
 const jwt = require("express-jwt");
+const dotenv = require("dotenv");
+dotenv.load();
 
+const SECRET = process.env.SECRET || "secret";
 const getTokenFromHeaders = req => {
   const {
     headers: { authorization }
@@ -13,12 +16,12 @@ const getTokenFromHeaders = req => {
 
 const auth = {
   required: jwt({
-    secret: "secret",
+    secret: SECRET,
     userProperty: "payload",
     getToken: getTokenFromHeaders
   }),
   optional: jwt({
-    secret: "secret",
+    secret: SECRET,
     userProperty: "payload",
     getToken: getTokenFromHeaders,
     credentialsRequired: false

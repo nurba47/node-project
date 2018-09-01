@@ -32,34 +32,32 @@ router.post("/", auth.optional, (req, res, next) => {
         referralCode: "is required"
       }
     });
-  } else {
-    Users.findOne({ referralCode: user.referralCode })
-      .then(found => {
-        if (!found)
-          return res.status(422).json({
-            errors: {
-              referralCode: `User with referralCode ${user.referralCode} does not exist`
-            }
-          });
-
-        const finalUser = new Users(user);
-
-        finalUser.setPassword(user.password);
-
-        return finalUser
-          .save()
-          .then(() => res.json({ user: finalUser.toAuthJSON() }))
-          .catch(error => res.status(422).json({ error: { message: "Email exists" } }));
-      })
-      .catch(err =>
-        res.status(500).json({
-          errors: {
-            message: err.message
-          }
-        })
-      );
-    return;
   }
+  Users.findOne({ referralCode: user.referralCode })
+    .then(found => {
+      if (!found)
+        return res.status(422).json({
+          errors: {
+            referralCode: `User with referralCode ${user.referralCode} does not exist`
+          }
+        });
+
+      const finalUser = new Users(user);
+
+      finalUser.setPassword(user.password);
+
+      return finalUser
+        .save()
+        .then(() => res.json({ user: finalUser.toAuthJSON() }))
+        .catch(error => res.status(422).json({ error: { message: "Email exists" } }));
+    })
+    .catch(err =>
+      res.status(500).json({
+        errors: {
+          message: err.message
+        }
+      })
+    );
 });
 
 //POST login route (optional, everyone has access)

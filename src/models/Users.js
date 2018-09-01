@@ -21,26 +21,13 @@ const UsersSchema = new Schema({
   },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
-  parentCode: {
-    type: String,
-    required: true,
-    validate: {
-      validator: function(parentCode) {
-        let UserModel = this.model("Users");
-        return new Promise(resolve => {
-          UserModel.findOne({ referralCode: parentCode }).then(user => {
-            return resolve(user !== null);
-          });
-        });
-      },
-      msg: props => `${props.value} is not a valid!`
-    }
-  },
+  ancestors: [{ type: String, ref: "Users" }],
   referralCode: {
     type: String,
     dropDups: true,
     unique: true
-  }
+  },
+  level: Number
 });
 
 UsersSchema.methods.setPassword = function(password) {
@@ -69,14 +56,32 @@ UsersSchema.methods.toAuthJSON = function() {
     _id: this._id,
     email: this.email,
     referralCode: this.referralCode,
-    parentCode: this.parentCode,
     token: this.generateJWT()
   };
 };
 
+UsersSchema.methods.getChildren = async function() {
+  const UserModel = this.model("Users");
+  let children = await UserModel.find(
+    { ancestors: this.referralCode },
+    { _id: 0, email: 1, level: 1 }
+  );
+  return children;
+};
+
 UsersSchema.pre("save", async function(next) {
+  // find parent then assign ancestors and level
+  const Users = this.model("Users");
+  let parent = await Users.findOne({ referralCode: this.referralCode });
+  if (!parent) {
+    next(new Error(`invalid ref ${this.referralCode}`));
+  }
+  this.ancestors = [parent.referralCode, ...parent.ancestors];
+  this.level = parent.level + 1;
+
+  // now generate referralCode for this user
+  const Codes = this.model("Codes");
   const prefix = generatePrefix();
-  const Codes = mongoose.model("Codes");
 
   let found = await Codes.findOne({ code: prefix });
   let number = found ? found.lastValue + 1 : 1;

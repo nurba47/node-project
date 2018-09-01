@@ -26,8 +26,8 @@ router.post("/", auth.optional, (req, res, next) => {
     });
   }
 
-  if (!user.parentCode) {
-    return res.status(422).json({ errors: { parentCode: "is required" } });
+  if (!user.referralCode) {
+    return res.status(422).json({ errors: { referralCode: "is required" } });
   }
 
   const finalUser = new Users(user);
@@ -79,7 +79,7 @@ router.post("/login", auth.optional, (req, res, next) => {
 });
 
 //GET current route (required, only authenticated users have access)
-router.get("/current", auth.required, (req, res, next) => {
+router.get("/tree", auth.required, (req, res, next) => {
   const {
     payload: { id }
   } = req;
@@ -89,7 +89,12 @@ router.get("/current", auth.required, (req, res, next) => {
       return res.sendStatus(400);
     }
 
-    return res.json({ user: user.toAuthJSON() });
+    user
+      .getChildren()
+      .then(children => {
+        return res.json({ children });
+      })
+      .catch(() => {});
   });
 });
 

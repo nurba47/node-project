@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const { codeGenerator } = require("../utils/helpers");
 dotenv.load();
 
 const SECRET = process.env.SECRET || "secret";
@@ -15,11 +16,19 @@ const UsersSchema = new Schema({
     lowercase: true,
     trim: true,
     dropDups: true,
-    unique: true
+    unique: true,
+    index: true
   },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
-  referralCode: { type: String, required: true }
+  parentCode: { type: String, required: true },
+  referralCode: {
+    type: String,
+    required: true,
+    dropDups: true,
+    unique: true,
+    index: true
+  }
 });
 
 UsersSchema.methods.setPassword = function(password) {
@@ -47,8 +56,15 @@ UsersSchema.methods.toAuthJSON = function() {
   return {
     _id: this._id,
     email: this.email,
+    referralCode: this.referralCode,
+    parentCode: this.parentCode,
     token: this.generateJWT()
   };
 };
+
+UsersSchema.pre("save", function(next) {
+  this.referralCode = codeGenerator(7);
+  next();
+});
 
 mongoose.model("Users", UsersSchema);

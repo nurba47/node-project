@@ -79,23 +79,55 @@ router.post("/login", auth.optional, (req, res, next) => {
 });
 
 //GET current route (required, only authenticated users have access)
-router.get("/tree", auth.required, (req, res, next) => {
+router.post("/tree", auth.required, async (req, res, next) => {
   const {
-    payload: { id }
+    payload: { id },
+    body: { childId }
   } = req;
 
-  return Users.findById(id).then(user => {
-    if (!user) {
-      return res.sendStatus(400);
-    }
+  try {
+    let user = await Users.findById(id);
+    if (!user) return res.sendStatus(400);
 
-    user
-      .getChildren()
-      .then(children => {
-        return res.json({ children });
-      })
-      .catch(() => {});
-  });
+    if (childId) {
+      let child = await Users.findById(childId);
+      if (child) {
+        return child
+          .getChildren()
+          .then(children => res.json({ children }))
+          .catch(() => {});
+      } else return res.sendStatus(400);
+    } else {
+      return user
+        .getChildren()
+        .then(children => res.json({ children }))
+        .catch(() => {});
+    }
+  } catch (error) {
+    return res.sendStatus(400);
+  }
 });
 
 module.exports = router;
+
+/* return Users.findById(id).then(user => {
+  if (!user) {
+    return res.sendStatus(400);
+  }
+  if (childId) {
+    user = await Users.findById(childId);
+    if (user) {
+      user
+        .getChildren()
+        .then(children => {
+          return res.json({ children });
+        })
+        .catch(() => {});
+    } else return res.json({ children });
+  } else {
+    user
+      .getChildren()
+      .then(children => res.json({ children }))
+      .catch(() => {});
+  }
+}); */

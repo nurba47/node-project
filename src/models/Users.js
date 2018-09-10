@@ -21,7 +21,7 @@ const UsersSchema = new Schema({
   },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
-  ancestors: [{ type: String, ref: "Users" }],
+  parent: { type: String, ref: "Users" },
   referralCode: {
     type: String,
     dropDups: true,
@@ -56,16 +56,13 @@ UsersSchema.methods.toAuthJSON = function() {
     _id: this._id,
     email: this.email,
     referralCode: this.referralCode,
-    token: this.generateJWT()
+    token: this.generateJWT(),
   };
 };
 
 UsersSchema.methods.getChildren = async function() {
   const UserModel = this.model("Users");
-  let children = await UserModel.find(
-    { ancestors: this.referralCode },
-    { _id: 0, email: 1, level: 1 }
-  );
+  let children = await UserModel.find({ parent: this.referralCode }, { email: 1, level: 1 });
   return children;
 };
 
@@ -76,7 +73,7 @@ UsersSchema.pre("save", async function(next) {
   if (!parent) {
     next(new Error(`invalid ref ${this.referralCode}`));
   }
-  this.ancestors = [parent.referralCode, ...parent.ancestors];
+  this.parent = parent.referralCode;
   this.level = parent.level + 1;
 
   // now generate referralCode for this user

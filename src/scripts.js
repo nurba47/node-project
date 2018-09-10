@@ -18,7 +18,7 @@ const Users = mongoose.model("Users");
 const Drugs = mongoose.model("Drugs");
 
 async function find(model, query, fields) {
-  let docs = await model.find(query, fields).count();
+  let docs = await model.find(query, fields);
   console.log("find", docs);
 }
 
@@ -49,10 +49,10 @@ async function remove(model, condition) {
   }
 }
 
-// find(Users, {}, { email: 1 });
+// find(Users, {}, { email: 1, children: 1 });
 // find(Drugs, {});
 
-// remove(Users);
+remove(Users, { email: { $ne: "admin@gmail.com" } });
 // remove(Drugs);
 
 // insertUser({

@@ -31,10 +31,7 @@ router.post("/login", validateAuthParams, (req, res, next) => {
     }
 
     if (passportUser) {
-      const user = passportUser;
-      user.token = passportUser.generateJWT();
-
-      return res.json({ user: user.toAuthJSON() });
+      return res.json({ user: passportUser.toAuthJSON() });
     }
 
     return res.status(400).send(info);

@@ -10,13 +10,13 @@ router.all("/", auth.required, validateUser, isAdmin, (req, res, next) => {
 
 router.get("/", async (req, res, next) => {
   let { user } = req.payload;
-  Rewards.getByUser(user._id, { __v: 0 })
-    .then(rewards => res.json({ rewards }))
-    .catch();
+  let rewards = await Rewards.getByUser(user._id, { __v: 0 });
+  return res.send({ rewards });
 });
 
 router.post("/", async (req, res, next) => {
-  return res.send({ status: "OK", rewards });
+  let { rewards } = req.body;
+  res.json({ status: "ok", rewards });
 });
 
 module.exports = router;

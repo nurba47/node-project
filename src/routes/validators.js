@@ -35,7 +35,7 @@ exports.validateUser = async (req, res, next) => {
 exports.isAdmin = async (req, res, next) => {
   const { user } = req.payload;
   // TODO: CHECK IF USER IS ADMIN
-  if (!user.isAdmin) res.sendStatus(401);
+  if (!user.isAdmin) return res.sendStatus(401);
 
   next();
 };

@@ -23,7 +23,7 @@ exports.validateAuthParams = async (req, res, next) => {
 };
 
 exports.validateUser = async (req, res, next) => {
-  const { user } = req.payload;
+  const { id } = req.payload;
 
   let user = await Users.findById(id);
   if (!user) return res.sendStatus(400);

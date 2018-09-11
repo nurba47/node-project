@@ -71,8 +71,10 @@ UsersSchema.methods.getChildren = async function() {
   stack.push(...children);
   while (stack.length > 0) {
     var currentNode = stack.pop();
-    var grandChildren = await currentNode.getChildren();
-    currentNode.children = grandChildren;
+    if (currentNode.children.length) {
+      var grandChildren = await currentNode.getChildren();
+      currentNode.children = grandChildren;
+    }
   }
   return children;
 };

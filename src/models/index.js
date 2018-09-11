@@ -1,3 +1,3 @@
 require("./Users");
-require("./Drugs");
+require("./Rewards");
 require("./Code");

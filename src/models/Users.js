@@ -22,6 +22,7 @@ const UsersSchema = new Schema({
   hash: { type: String, required: true },
   salt: { type: String, required: true },
   parent: { type: String, ref: "Users" },
+  children: [{ type: String, ref: "Users" }],
   referralCode: {
     type: String,
     dropDups: true,
@@ -56,13 +57,23 @@ UsersSchema.methods.toAuthJSON = function() {
     _id: this._id,
     email: this.email,
     referralCode: this.referralCode,
-    token: this.generateJWT(),
+    token: this.generateJWT()
   };
 };
 
 UsersSchema.methods.getChildren = async function() {
   const UserModel = this.model("Users");
-  let children = await UserModel.find({ parent: this.referralCode }, { email: 1, level: 1 });
+  let children = await UserModel.find(
+    { referralCode: { $in: this.children } },
+    { _id: 0, __v: 0, hash: 0, salt: 0 }
+  );
+  var stack = [];
+  stack.push(...children);
+  while (stack.length > 0) {
+    var currentNode = stack.pop();
+    var grandChildren = await currentNode.getChildren();
+    currentNode.children = grandChildren;
+  }
   return children;
 };
 
@@ -92,6 +103,16 @@ UsersSchema.pre("save", async function(next) {
   } catch (error) {
     next(error);
   }
+  next();
+});
+
+UsersSchema.post("save", async function() {
+  const Users = this.model("Users");
+  let parent = await Users.findOne({ referralCode: this.parent });
+
+  await Users.findByIdAndUpdate(parent._id, {
+    $set: { children: [...parent.children, this.referralCode] }
+  });
 });
 
 mongoose.model("Users", UsersSchema);

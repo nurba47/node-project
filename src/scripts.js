@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const drugs = require("../data");
+const usersData = require("../data");
 const dotenv = require("dotenv");
 dotenv.load();
 
@@ -17,15 +17,28 @@ require("./models");
 const Users = mongoose.model("Users");
 const Drugs = mongoose.model("Drugs");
 
+async function findUser(query) {
+  return await Users.findOne(query);
+}
+
 async function find(model, query, fields) {
   let docs = await model.find(query, fields);
-  console.log("find", docs);
+  console.log("find", JSON.stringify(docs));
 }
 
 async function insertDrug(drug) {
   try {
     const res = await new Drugs(drug).save();
     // console.log("save", res);
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+async function insertMany(model, docs) {
+  try {
+    const res = await model.insertMany(docs);
+    console.log("insertMany", res);
   } catch (error) {
     console.log(error.message);
   }
@@ -49,10 +62,16 @@ async function remove(model, condition) {
   }
 }
 
-// find(Users, {}, { email: 1, children: 1 });
+// find(Users, {}, { _id: 0, __v: 0, hash: 0, salt: 0 });
+
+// findUser({ referralCode: 1 }).then(async user => {
+//   let children = await user.getChildren();
+//   console.log("CHILDREN", children);
+// });
+
 // find(Drugs, {});
 
-remove(Users, { email: { $ne: "admin@gmail.com" } });
+// remove(Users, { email: { $ne: "admin@gmail.com" } });
 // remove(Drugs);
 
 // insertUser({
@@ -62,4 +81,7 @@ remove(Users, { email: { $ne: "admin@gmail.com" } });
 //     referralCode: "0"
 //   }
 // });
+
+// insertMany(Users, usersData)
+
 // drugs.forEach(d => insertDrug(d));

@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Users = mongoose.model("Users");
+const dotenv = require("dotenv");
+dotenv.load();
 
 exports.validateAuthParams = async (req, res, next) => {
   const { user } = req.body;
@@ -33,9 +35,8 @@ exports.validateUser = async (req, res, next) => {
 };
 
 exports.isAdmin = async (req, res, next) => {
-  const { user } = req.payload;
-  // TODO: CHECK IF USER IS ADMIN
-  if (!user.isAdmin) return res.sendStatus(401);
+  const { id } = req.payload;
+  if (id !== process.env.ADMIN_ID) return res.sendStatus(401);
 
   next();
 };

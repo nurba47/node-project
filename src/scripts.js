@@ -15,7 +15,7 @@ mongoose.set("debug", true);
 require("./models");
 
 const Users = mongoose.model("Users");
-const Drugs = mongoose.model("Drugs");
+const Rewards = mongoose.model("Rewards");
 
 async function findUser(query) {
   return await Users.findOne(query);
@@ -62,7 +62,7 @@ async function remove(model, condition) {
   }
 }
 
-// find(Users, {}, { _id: 0, __v: 0, hash: 0, salt: 0 });
+// find(Users, {email: "admin@gmail.com"}, { __v: 0, hash: 0, salt: 0 });
 
 // findUser({ referralCode: 1 }).then(async user => {
 //   let children = await user.getChildren();

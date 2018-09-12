@@ -4,11 +4,14 @@ const auth = require("../auth");
 const { isAdmin } = require("../validators");
 const Rewards = mongoose.model("Rewards");
 
-router.all("/", auth.required, isAdmin, (req, res, next) => {
-  next();
+router.get("/user", auth.required, async (req, res, next) => {
+  let { id } = req.payload;
+
+  let rewards = await Rewards.getByUser(id, { __v: 0 });
+  return res.send({ rewards });
 });
 
-router.get("/:user_id", async (req, res, next) => {
+router.get("/:user_id", auth.required, isAdmin, async (req, res, next) => {
   let { user_id } = req.params;
   if (!user_id) return res.sendStatus(400);
 
@@ -16,7 +19,7 @@ router.get("/:user_id", async (req, res, next) => {
   return res.send({ rewards });
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", auth.required, isAdmin, async (req, res, next) => {
   let { user_id, rewards } = req.body;
   rewards.forEach(r => {
     r.userId = user_id;
@@ -25,7 +28,6 @@ router.post("/", async (req, res, next) => {
   try {
     result = await Rewards.insertMany(rewards);
   } catch (error) {
-    console.log(error)
     return res.sendStatus(400);
   }
 
@@ -37,7 +39,7 @@ router.post("/", async (req, res, next) => {
   return res.json({ result });
 });
 
-router.put("/", async (req, res, next) => {
+router.put("/", auth.required, isAdmin, async (req, res, next) => {
   let { user_id, rewards } = req.body;
   if (!user_id) return res.sendStatus(400);
 

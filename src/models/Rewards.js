@@ -9,11 +9,11 @@ const RewardsSchema = new Schema({
   },
   income: { type: Number, required: true },
   withdraw: { type: Number, required: true },
-  userId: { type: Schema.Types.ObjectId, ref: "Users" }
+  userId: { type: Schema.Types.ObjectId, ref: "Users", required: true }
 });
 
 RewardsSchema.statics.getByUser = async function(id) {
-  return await this.find({ user_id: id }, { __v: 0, userId: 0 });
+  return await this.find({ userId: id }, { __v: 0, userId: 0 });
 };
 
 mongoose.model("Rewards", RewardsSchema);

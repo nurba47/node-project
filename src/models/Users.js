@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 dotenv.load();
 
 const SECRET = process.env.SECRET || "secret";
+const ADMIN_ID = process.env.ADMIN_ID;
 
 const { Schema } = mongoose;
 
@@ -58,7 +59,8 @@ UsersSchema.methods.toAuthJSON = function() {
     email: this.email,
     referralCode: this.referralCode,
     token: this.generateJWT(),
-    isAdmin: this._id === process.env.ADMIN_ID
+    isAdmin: this._id.toString() === ADMIN_ID,
+    registrationDate: this._id.getTimestamp()
   };
 };
 

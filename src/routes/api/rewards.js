@@ -21,6 +21,8 @@ router.get("/:user_id", auth.required, isAdmin, async (req, res, next) => {
 
 router.post("/", auth.required, isAdmin, async (req, res, next) => {
   let { user_id, rewards } = req.body;
+  if (!user_id || !rewards || !rewards.length) return res.sendStatus(400);
+
   rewards.forEach(r => {
     r.userId = user_id;
   });
@@ -41,7 +43,7 @@ router.post("/", auth.required, isAdmin, async (req, res, next) => {
 
 router.put("/", auth.required, isAdmin, async (req, res, next) => {
   let { user_id, rewards } = req.body;
-  if (!user_id) return res.sendStatus(400);
+  if (!user_id || !rewards || !rewards.length) return res.sendStatus(400);
 
   let updates = rewards.map(r => {
     return {
@@ -55,6 +57,28 @@ router.put("/", auth.required, isAdmin, async (req, res, next) => {
   let result;
   try {
     result = await Rewards.bulkWrite(updates);
+  } catch (error) {
+    return res.sendStatus(400);
+  }
+
+  return res.json({ result });
+});
+
+router.delete("/", auth.required, isAdmin, async (req, res, next) => {
+  let { user_id, reward_ids } = req.body;
+  if (!user_id || !reward_ids || !reward_ids.length) return res.sendStatus(400);
+
+  let deletes = reward_ids.map(id => {
+    return {
+      deleteOne: {
+        filter: { userId: user_id, _id: id }
+      }
+    };
+  });
+
+  let result;
+  try {
+    result = await Rewards.bulkWrite(deletes);
   } catch (error) {
     return res.sendStatus(400);
   }

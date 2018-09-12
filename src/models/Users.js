@@ -57,7 +57,8 @@ UsersSchema.methods.toAuthJSON = function() {
     _id: this._id,
     email: this.email,
     referralCode: this.referralCode,
-    token: this.generateJWT()
+    token: this.generateJWT(),
+    isAdmin: this._id === process.env.ADMIN_ID
   };
 };
 

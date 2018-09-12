@@ -3,7 +3,12 @@ const passport = require("passport");
 const router = require("express").Router();
 const auth = require("../auth");
 const Users = mongoose.model("Users");
-const { validateAuthParams, validateUser } = require("../validators");
+const { validateAuthParams, validateUser, isAdmin } = require("../validators");
+
+router.get("/", auth.required, isAdmin, async (req, res, next) => {
+  let users = await Users.find({}, { _id: 1, email: 1 });
+  return res.json(users);
+});
 
 //POST new user route (optional, everyone has access)
 router.post("/", validateAuthParams, (req, res, next) => {

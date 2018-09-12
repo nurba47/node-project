@@ -62,7 +62,18 @@ async function remove(model, condition) {
   }
 }
 
-// find(Users, {email: "admin@gmail.com"}, { __v: 0, hash: 0, salt: 0 });
+async function updateOne(model, condition, values) {
+  try {
+    let res = await model.findOneAndUpdate(condition, values);
+    console.log("updateOne", res)
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// updateOne(Users, {email: "арзыматова зарина"}, {email: "Арзыматова Зарина"});
+
+// find(Users, {email: "Арзыматова Зарина"}, { __v: 0, hash: 0, salt: 0 });
 
 // findUser({ referralCode: 1 }).then(async user => {
 //   let children = await user.getChildren();

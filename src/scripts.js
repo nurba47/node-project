@@ -71,7 +71,7 @@ async function updateOne(model, condition, values) {
   }
 }
 
-// updateOne(Users, {email: "арзыматова зарина"}, {email: "Арзыматова Зарина"});
+// updateOne(Users, {email: "Арзыматова Зарина"}, {children: []});
 
 // find(Users, {email: "Арзыматова Зарина"}, { __v: 0, hash: 0, salt: 0 });
 
@@ -82,7 +82,7 @@ async function updateOne(model, condition, values) {
 
 // find(Drugs, {});
 
-// remove(Users, { email: { $ne: "admin@gmail.com" } });
+// remove(Users, { email: { $ne: "Арзыматова Зарина" } });
 // remove(Drugs);
 
 // insertUser({

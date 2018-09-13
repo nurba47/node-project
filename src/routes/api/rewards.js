@@ -1,22 +1,25 @@
 const mongoose = require("mongoose");
 const router = require("express").Router();
 const auth = require("../auth");
-const { isAdmin } = require("../validators");
+const { validateUser, isAdmin } = require("../validators");
+const Users = mongoose.model("Users");
 const Rewards = mongoose.model("Rewards");
 
-router.get("/user", auth.required, async (req, res, next) => {
-  let { id } = req.payload;
+router.get("/own/", auth.required, validateUser, async (req, res, next) => {
+  let { user } = req.payload;
 
-  let rewards = await Rewards.getByUser(id, { __v: 0 });
-  return res.send({ rewards });
+  let rewards = await Rewards.getByUser(user._id, { __v: 0 });
+  return res.send({ active: user.active, benefit: user.benefit, rewards });
 });
 
+// Only admin has access to endpoints below
 router.get("/:user_id", auth.required, isAdmin, async (req, res, next) => {
   let { user_id } = req.params;
   if (!user_id) return res.sendStatus(400);
 
+  let userData = await Users.findById(user_id, { active: 1, benefit: 1 });
   let rewards = await Rewards.getByUser(user_id, { __v: 0 });
-  return res.send({ rewards });
+  return res.send({ active: userData.active, benefit: userData.benefit, rewards });
 });
 
 router.post("/", auth.required, isAdmin, async (req, res, next) => {
@@ -42,26 +45,44 @@ router.post("/", auth.required, isAdmin, async (req, res, next) => {
 });
 
 router.put("/", auth.required, isAdmin, async (req, res, next) => {
-  let { user_id, rewards } = req.body;
-  if (!user_id || !rewards || !rewards.length) return res.sendStatus(400);
+  let { user_id, rewards, active, benefit } = req.body;
+  if (!user_id) return res.sendStatus(400);
 
-  let updates = rewards.map(r => {
-    return {
-      updateOne: {
-        filter: { userId: user_id, _id: r._id },
-        update: { date: r.date, income: r.income, withdraw: r.withdraw }
-      }
-    };
-  });
+  let noRewards = !rewards || !rewards.length;
+  let noActive = !active;
+  let noBenefit = !benefit;
+  if (noRewards && noActive && noBenefit) return res.sendStatus(400);
 
-  let result;
-  try {
-    result = await Rewards.bulkWrite(updates);
-  } catch (error) {
-    return res.sendStatus(400);
+  let result = {};
+
+  let userUpdates = {};
+  if (active) userUpdates.active = active;
+  if (benefit) userUpdates.benefit = benefit;
+  if (Object.keys(userUpdates).length > 0) {
+    try {
+      await Users.findByIdAndUpdate(user_id, { $set: userUpdates });
+    } catch (error) {
+      return res.sendStatus(400);
+    }
   }
 
-  return res.json({ result });
+  if (rewards && rewards.length) {
+    let rewardUpdates = rewards.map(r => {
+      return {
+        updateOne: {
+          filter: { userId: user_id, _id: r._id },
+          update: { date: r.date, income: r.income, withdraw: r.withdraw }
+        }
+      };
+    });
+
+    try {
+      result.rewards = await Rewards.bulkWrite(rewardUpdates);
+    } catch (error) {
+      return res.sendStatus(400);
+    }
+  }
+  return res.json(result);
 });
 
 router.delete("/", auth.required, isAdmin, async (req, res, next) => {

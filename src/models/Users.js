@@ -29,7 +29,9 @@ const UsersSchema = new Schema({
     dropDups: true,
     unique: true
   },
-  level: Number
+  level: Number,
+  active: { type: Boolean, default: true },
+  benefit: { type: Number, default: 100 }
 });
 
 UsersSchema.methods.setPassword = function(password) {

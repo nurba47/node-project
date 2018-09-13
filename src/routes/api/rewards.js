@@ -53,17 +53,13 @@ router.put("/", auth.required, isAdmin, async (req, res, next) => {
   let { user_id, rewards, active, benefits, points } = req.body;
   if (!user_id) return res.sendStatus(400);
 
-  let noRewards = !rewards || !rewards.length;
-  let noActive = !active;
-  let noBenefits = !benefits;
-  let noPoints = !points;
-  if (noRewards && noActive && noBenefits && noPoints) return res.sendStatus(400);
+  if (!rewards || (!rewards.length && !active && !benefits && !points)) return res.sendStatus(400);
 
   let result = {};
 
   let userUpdates = {};
-  if (active) userUpdates.active = active;
-  if (benefits) userUpdates.benefits = benefits;
+  if (active === true || active === false) userUpdates.active = active;
+  if (benefits === true || active === false) userUpdates.benefits = benefits;
   if (points) userUpdates.points = points;
   if (Object.keys(userUpdates).length > 0) {
     try {

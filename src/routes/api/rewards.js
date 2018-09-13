@@ -9,7 +9,7 @@ router.get("/own/", auth.required, validateUser, async (req, res, next) => {
   let { user } = req.payload;
 
   let rewards = await Rewards.getByUser(user._id, { __v: 0 });
-  return res.send({ active: user.active, benefit: user.benefit, rewards });
+  return res.send({ active: user.active, benefits: user.benefits, points: user.points, rewards });
 });
 
 // Only admin has access to endpoints below
@@ -17,9 +17,14 @@ router.get("/:user_id", auth.required, isAdmin, async (req, res, next) => {
   let { user_id } = req.params;
   if (!user_id) return res.sendStatus(400);
 
-  let userData = await Users.findById(user_id, { active: 1, benefit: 1 });
+  let userData = await Users.findById(user_id, { active: 1, benefits: 1, points: 1 });
   let rewards = await Rewards.getByUser(user_id, { __v: 0 });
-  return res.send({ active: userData.active, benefit: userData.benefit, rewards });
+  return res.send({
+    active: userData.active,
+    benefits: userData.benefits,
+    points: userData.points,
+    rewards
+  });
 });
 
 router.post("/", auth.required, isAdmin, async (req, res, next) => {
@@ -45,19 +50,21 @@ router.post("/", auth.required, isAdmin, async (req, res, next) => {
 });
 
 router.put("/", auth.required, isAdmin, async (req, res, next) => {
-  let { user_id, rewards, active, benefit } = req.body;
+  let { user_id, rewards, active, benefits, points } = req.body;
   if (!user_id) return res.sendStatus(400);
 
   let noRewards = !rewards || !rewards.length;
   let noActive = !active;
-  let noBenefit = !benefit;
-  if (noRewards && noActive && noBenefit) return res.sendStatus(400);
+  let noBenefits = !benefits;
+  let noPoints = !points;
+  if (noRewards && noActive && noBenefits && noPoints) return res.sendStatus(400);
 
   let result = {};
 
   let userUpdates = {};
   if (active) userUpdates.active = active;
-  if (benefit) userUpdates.benefit = benefit;
+  if (benefits) userUpdates.benefits = benefits;
+  if (points) userUpdates.points = points;
   if (Object.keys(userUpdates).length > 0) {
     try {
       await Users.findByIdAndUpdate(user_id, { $set: userUpdates });

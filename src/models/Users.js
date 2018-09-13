@@ -31,7 +31,8 @@ const UsersSchema = new Schema({
   },
   level: Number,
   active: { type: Boolean, default: true },
-  benefit: { type: Number, default: 100 }
+  benefits: { type: Boolean, default: true },
+  points: { type: Number, default: 100 },
 });
 
 UsersSchema.methods.setPassword = function(password) {

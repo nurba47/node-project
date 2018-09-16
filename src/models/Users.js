@@ -33,6 +33,7 @@ const UsersSchema = new Schema({
   active: { type: Boolean, default: true },
   benefits: { type: Boolean, default: true },
   points: { type: Number, default: 100 },
+  totalPoints: { type: Number, default: 0 },
 });
 
 UsersSchema.methods.setPassword = function(password) {
@@ -58,7 +59,6 @@ UsersSchema.methods.generateJWT = function() {
 
 UsersSchema.methods.toAuthJSON = function() {
   return {
-    _id: this._id,
     email: this.email,
     referralCode: this.referralCode,
     token: this.generateJWT(),

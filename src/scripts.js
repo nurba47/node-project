@@ -65,15 +65,15 @@ async function remove(model, condition) {
 async function updateOne(model, condition, values) {
   try {
     let res = await model.findOneAndUpdate(condition, values);
-    console.log("updateOne", res)
+    console.log("updateOne", res);
   } catch (error) {
     console.log(error);
   }
 }
 
-// updateOne(Users, {email: "Арзыматова Зарина"}, {children: []});
+// updateOne(Users, { email: "Арзыматова Зарина" }, { children: [] });
 
-// find(Users, {email: "Арзыматова Зарина"}, { __v: 0, hash: 0, salt: 0 });
+// find(Users, { email: "Арзыматова Зарина" }, { __v: 0, hash: 0, salt: 0 });
 
 // findUser({ referralCode: 1 }).then(async user => {
 //   let children = await user.getChildren();
